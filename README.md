@@ -1,6 +1,6 @@
 # Localized Homology
 
-A python implementation of localized homology in the paper:
+A python implementation of the localized homology algorithm in the paper:
 
 A. Zomorodian, G. Carlsson, Localized Homology, Computational Geometry 41 (2008) 126–148
 
