@@ -58,7 +58,7 @@ class BlowupComplex():
     
     def _construct_from_cover(self): 
         i_start=0
-        D_J  = util.make_standard_simplex(len(self.U)) 
+        D_J  = util.make_standard_simplex(len(self.U))  
         for delta in D_J:
             
             X_J = util.subset_intersection([ self.U[d] for d in delta])  
@@ -111,7 +111,7 @@ class BlowupComplex():
             for sp in self.X_U[t]:
                 sp.boundary = sorted(sp.boundary,key=lambda x: (  x  ))
                 
-    def compute_persistence(self,verbose=False):
+    def compute_persistence(self,verbose=False,show_diag=True):
         # convert simplices and boundary to the column format for persistence
         ordered_simplices = [sp.to_ordered_simplex() for X_U_T in self.X_U  for sp in  X_U_T   ]  
         if verbose:
@@ -124,8 +124,8 @@ class BlowupComplex():
             for col in columns:
                 print(col)
         # for coloring localized cycles
-        cover = [ ''.join([str(s) for s in sp.delta ])  for X_U_T in self.X_U  for sp in  X_U_T   ]  
+        cover = [ '-'.join([str(s) for s in sp.delta ])  for X_U_T in self.X_U  for sp in  X_U_T   ]  
         if verbose:
             print('cover',cover)
-        self.dgms = persis.compute_persistence(ordered_simplices, columns,cover, show_diag=True) 
+        self.dgms = persis.compute_persistence(ordered_simplices, columns,cover, show_diag=show_diag) 
     

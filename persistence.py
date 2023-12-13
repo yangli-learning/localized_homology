@@ -74,7 +74,7 @@ def plotbarcode_BC(dgms,dim,coverlabel2id):
     labels = [ c for b,d,c in dgms[dim]]
     
     _, axes = plt.subplots(1, 1,figsize=(4,1.5))
-    colormap = plt.cm.Set1.colors
+    colormap = plt.cm.tab20.colors
     print(persistence)
     
     death = [d for b,d,c in dgms[dim]]
@@ -85,11 +85,20 @@ def plotbarcode_BC(dgms,dim,coverlabel2id):
     
     x = [birth for (dim, (birth, death)) in persistence]
     y = [(death - birth) if death != float("inf") else (infinity - birth) for (dim, (birth, death)) in persistence]
-    c = [colormap[dim] for (dim, (birth, death)) in persistence]
+    c = [colormap[dim % len(colormap) ] for (dim, (birth, death)) in persistence]
     
     axes.barh(range(len(x)), y, left=x, alpha=0.5, color=c, linewidth=0,label=labels)
     plt.axvline(x=infinity , color='red', linestyle='--') 
-    axes.legend()
+
+
+    # Shrink current axis by 20%
+    box = axes.get_position()
+    axes.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+
+    # Put a legend to the right of the current axis
+    axes.legend(loc='center left', bbox_to_anchor=(1, 0.5),ncol = 3)#oc="lower right")
+
+    #axes.legend( )
     axes.set_title("Persistence barcode", fontsize=12)
     axes.set_yticks([])   #axes.invert_yaxis()
     plt.show()
