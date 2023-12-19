@@ -71,7 +71,6 @@ class BlowupComplex():
         self.sp_to_id  = dict( [(sp,i) for i,sp in enumerate(flattened_list)])
 
         B_delta  = self._compute_boundary_delta(D_J) 
-        print(B_delta)
         self._compute_boundary(D_J,B_delta)
         
 
@@ -121,11 +120,15 @@ class BlowupComplex():
 
         if verbose:
             print('boundary columns')
-            for col in columns:
-                print(col)
+            for i,col in enumerate(columns):
+                print(i,":",col)
         # for coloring localized cycles
         cover = [ '-'.join([str(s) for s in sp.delta ])  for X_U_T in self.X_U  for sp in  X_U_T   ]  
         if verbose:
             print('cover',cover)
-        self.dgms = persis.compute_persistence(ordered_simplices, columns,cover, show_diag=show_diag) 
-    
+        self.dgms,self.cycle_basis = persis.compute_persistence(ordered_simplices, 
+                                               columns,cover, 
+                                               show_diag=show_diag,verbose=verbose) 
+        flattened_list = [(sp.sigma,sp.delta) for X_U_T in self.X_U for sp in X_U_T]
+        for creator,basis in self.cycle_basis.items():
+            print(creator,":", [   flattened_list [i] for i in basis] )

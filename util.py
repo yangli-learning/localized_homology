@@ -2,6 +2,8 @@ import itertools
 from sklearn import datasets
 from sklearn.datasets import make_circles
 import numpy as np
+#from matplotlib import pyplot as plt
+
 def make_standard_simplex(n):
     # standard simplex Delta^J 
     # Delta^J  = [ ([0],0), ([1],0),([0,1],1) ]
@@ -35,3 +37,13 @@ def threecircles(N,s):
 
     circles_data = np.concatenate([circle1, circle2, circle3])
     return circles_data
+
+def legend_without_duplicate_labels(ax):
+    # https://stackoverflow.com/questions/19385639/duplicate-items-in-legend-in-matplotlib
+    handles, labels = ax.get_legend_handles_labels()
+    handles.reverse()
+    labels.reverse()
+    unique = [(h, l) for i, (h, l) in enumerate(zip(handles , labels )) if l not in labels[:i]]
+    
+    ax.legend(*zip(*unique),loc='center left', 
+              bbox_to_anchor=(1, 0.5),ncol = 3) 

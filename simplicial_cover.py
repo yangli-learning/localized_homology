@@ -30,13 +30,14 @@ class HyperCube:
       for edge in self.edge:
         self.edge_matrix[edge[0],edge[1]] = 1
         self.edge_matrix[edge[1],edge[0]] = 1
+      self.compute_cover()
 
     def distance_btp(p1, p2):
       r0 = pow((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2, 0.5)
       return r0
 
-    def cover(self):
-      cover = []
+    def compute_cover(self):
+      self.cover = []
 
       max_x = max(self.point[:,0])
       min_x = min(self.point[:,0])
@@ -67,7 +68,7 @@ class HyperCube:
           if ((min_y + (i+1)*range_y + range_y*self.r/2) >= point[1] >= (min_y + i * range_y - range_y*self.r/2)):
             cover_y[i].append([j])
 
-      cover = [[] for _ in range(self.N * self.M)]
+      self.cover = [[] for _ in range(self.N * self.M)]
       i = 0
 
 
@@ -75,12 +76,12 @@ class HyperCube:
         for y in range(self.M):
           for point in cover_x[x]:
             if point in cover_y[y]:
-              cover[i].append(point)
+              self.cover[i].append(point)
 
           i = i+1
 
 
-      step_cover = cover
+      step_cover = self.cover
       for j in range(len(step_cover)):
 
         step_edge_matrix = self.edge_matrix
@@ -92,16 +93,16 @@ class HyperCube:
             #print(i,j)
             if step_edge_matrix[step_cover[j][k][0],i] == 1 and step_edge_matrix[i,step_cover[j][k][0]] == 1 and [i] in step_cover[j]:
               if step_cover[j][k][0] < i:
-                if [step_cover[j][k][0],i] in cover[j]:
+                if [step_cover[j][k][0],i] in self.cover[j]:
                   continue
                 else:
-                  cover[j].append([step_cover[j][k][0],i])
+                  self.cover[j].append([step_cover[j][k][0],i])
               else:
-                if [i, step_cover[j][k][0]] in cover[j]:
+                if [i, step_cover[j][k][0]] in self.cover[j]:
                   continue
                 else:
-                  cover[j].append([i,step_cover[j][k][0]])
-      return cover
+                  self.cover[j].append([i,step_cover[j][k][0]])
+      #return cover
 
     def draw_cover(self):
 
@@ -117,8 +118,8 @@ class HyperCube:
         #print(self.edge)
         for edge in self.edge:
 
-          plt.plot(self.point[edge, 0], self.point[edge, 1],color= 'blue')
-          #plt.triplot(self.data[:, 0], self.data[:, 1], self.simplices)
+            plt.plot(self.point[edge, 0], self.point[edge, 1],color= 'blue')
+            #plt.triplot(self.data[:, 0], self.data[:, 1], self.simplices)
         plt.scatter(self.point[:, 0], self.point[:, 1], color='r')
         plt.show()
 
@@ -126,4 +127,30 @@ class HyperCube:
 
 
 
+    def draw_cover_subset(self,j,i,ax):
+        print(i,j,'cover size',len(self.cover))
+        x1, y1 = self.bounder_list_x[i][0], self.bounder_list_y[j][0]
+        x2, y2 = self.bounder_list_x[i][1], self.bounder_list_y[j][1]
+        ax.plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1],
+                  'ro-',alpha = 0.5,
+                  color = [round(i/self.N, 1),round(j/self.M, 1),
+                           round(i*j/(self.N*self.M),1)])
+        cover_ij = self.cover[i*self.M+j] 
+        print("cover (x=%d,y=%d)" % (i,j), cover_ij )
 
+        for  edge in self.edge:
+          edge.sort()
+          print(edge  )
+          if edge in  cover_ij:
+            
+            ax.plot(self.point[edge, 0], self.point[edge, 1],color= 'red')
+          else:
+            ax.plot(self.point[edge, 0], self.point[edge, 1],color= 'gray',alpha=0.3)
+
+        points = [ p[0] for p in cover_ij if len(p)==1]
+        ax.scatter(self.point[points, 0], self.point[points, 1], color='r')
+
+        ax.set_title("ID=%d" % (  i*self.M+j))
+
+      #print(self.edge)
+    
