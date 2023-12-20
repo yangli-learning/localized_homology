@@ -3,6 +3,7 @@ import util
 import itertools
 import persistence as persis
 import cechmate as cm  
+import numpy as np
 
 class ProductSimplex:
     """
@@ -110,7 +111,7 @@ class BlowupComplex():
             for sp in self.X_U[t]:
                 sp.boundary = sorted(sp.boundary,key=lambda x: (  x  ))
                 
-    def compute_persistence(self,verbose=False,show_diag=True):
+    def compute_persistence(self,verbose=False,show_diag=True,compute_basis=True):
         # convert simplices and boundary to the column format for persistence
         ordered_simplices = [sp.to_ordered_simplex() for X_U_T in self.X_U  for sp in  X_U_T   ]  
         if verbose:
@@ -126,9 +127,31 @@ class BlowupComplex():
         cover = [ '-'.join([str(s) for s in sp.delta ])  for X_U_T in self.X_U  for sp in  X_U_T   ]  
         if verbose:
             print('cover',cover)
-        self.dgms,self.cycle_basis = persis.compute_persistence(ordered_simplices, 
+        self.dgms,self.pairs  = persis.compute_persistence_dgm(ordered_simplices, 
                                                columns,cover, 
                                                show_diag=show_diag,verbose=verbose) 
-        flattened_list = [(sp.sigma,sp.delta) for X_U_T in self.X_U for sp in X_U_T]
-        for creator,basis in self.cycle_basis.items():
-            print(creator,":", [   flattened_list [i] for i in basis] )
+    
+        if compute_basis: 
+            # trace the basis of each homology class
+            self.cycle_basis = persis.compute_basis_from_persistence_pairs(columns, 
+                                                                           ordered_simplices, self.pairs) 
+            flattened_list = [sp for X_U_T in self.X_U for sp in X_U_T]
+            # map the basis to barcode, simplices and to cover
+            for creator,basis_dict in self.cycle_basis.items():
+                basis_dict['product_simplex']=[flattened_list[i] for i in basis_dict['basis'] ]
+                coverset = [tuple(sp.delta) for sp in basis_dict['product_simplex'] ]
+                basis_dict['cover'] =  set().union(*coverset)
+            
+        print('number of barcode', np.sum( [ len(x) for t,x in self.dgms.items()])) # if show_diagonal is true, equals the number of pairs
+        print('number of persistence pairs',len(self.pairs)) # all pairs (but not ordered)
+        print('number of H classes at infty', len(self.cycle_basis)) # only pairs existing at infty
+
+    def get_cycle_edges_by_birth(self,birth):
+        cycles =  []
+        for creator,basis_dict in self.cycle_basis.items():
+            if basis_dict['barcode'][0] == birth:
+                cycles.append(  [ tuple(sp.sigma ) for sp in basis_dict['product_simplex']])
+                print('cover',basis_dict['cover'] )
+                
+        return cycles
+        

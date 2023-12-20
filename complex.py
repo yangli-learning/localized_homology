@@ -65,3 +65,29 @@ class DelaunayComplex:
       #plt.triplot(self.data[:, 0], self.data[:, 1], self.simplices)
       plt.scatter(self.data[:, 0], self.data[:, 1], color='r')
       plt.show()
+
+
+
+
+    def draw_chain(self,edgelist,ax):
+        colors = plt.cm.coolwarm(np.linspace(0, 1,len(edgelist)))
+        
+        for i,edge in enumerate( edgelist):
+            ax.plot(self.point[edge,0], self.point[edge,1], color=colors[i]) 
+
+
+
+    def draw_chains(self,chains) :
+      for edge in self.edge_index():
+        plt.plot(self.data[edge, 0], self.data[edge, 1],color= 'gray',alpha=0.2)
+      colors = plt.cm.rainbow(np.linspace(0, 1,len(chains)))
+
+      for i,chain in enumerate(chains):
+        # get 2d edges only
+        edges = [ sp for sp in chain if len(sp)==2]
+        for edge in edges:
+          plt.plot(self.data[edge, 0], self.data[edge, 1],color= colors[i],alpha=0.5 )
+      plt.show()
+
+
+

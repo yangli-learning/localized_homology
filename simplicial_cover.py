@@ -152,5 +152,12 @@ class HyperCube:
 
         ax.set_title("ID=%d" % (  i*self.M+j))
 
-      #print(self.edge)
-    
+       #print(self.edge)
+    '''
+    def draw_chain(self,edgelist,ax):
+        colors = plt.cm.coolwarm(np.linspace(0, 1,len(edgelist)))
+        
+        for i,edge in enumerate( edgelist):
+            ax.plot(self.point[edge,0], self.point[edge,1], color=colors[i]) 
+
+    '''

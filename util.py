@@ -2,6 +2,8 @@ import itertools
 from sklearn import datasets
 from sklearn.datasets import make_circles
 import numpy as np
+from collections import Counter
+
 #from matplotlib import pyplot as plt
 
 def make_standard_simplex(n):
@@ -46,4 +48,13 @@ def legend_without_duplicate_labels(ax):
     unique = [(h, l) for i, (h, l) in enumerate(zip(handles , labels )) if l not in labels[:i]]
     
     ax.legend(*zip(*unique),loc='center left', 
-              bbox_to_anchor=(1, 0.5),ncol = 3) 
+              bbox_to_anchor=(1, 0.5), ncol = 3) 
+
+def find_superset( sets, query):
+       
+    # Extract tuple supersets from List
+    # Using all() + list comprehension + Counter
+    res = [sub for sub in sets if
+        all(Counter(sub)[x] >= Counter(query)[x]
+        for x in Counter(query))]
+    return res 

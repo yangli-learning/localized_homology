@@ -39,9 +39,9 @@ if __name__=='__main__':
     blowup.compute_persistence(verbose=False)
     print('all basis',blowup.cycle_basis)
 
-    
-    
-    
+    cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
+    print( "cycles with birth 1:", cycle_edges)
+
     """ 
     a cycle with three covers 
     ```
@@ -62,32 +62,34 @@ if __name__=='__main__':
     blowup.compute_persistence(verbose=False )
     print('all basis',blowup.cycle_basis)
     
-
     """
     point cloud with hypercube cover
     """
-    circles_data = util.threecircles(N=20,s=42)
+    circles_data = util.threecircles(N=25,s=42)
     delaunay_complex = DelaunayComplex(np.array(circles_data ),4)#生成2Dmesh
     
-    N=3 # columns
+    N=1# columns
     M=3 # rows
-    a = HyperCube(circles_data,delaunay_complex.edge_index(), 
-                N,  M,  r=1  )
-    print("Create hyperCube cover of size:", len(a.cover))
+    hypercube = HyperCube(circles_data,delaunay_complex.edge_index(), 
+                N,  M,  r=0.5)
+    print("Create hyperCube cover of size:", len(hypercube.cover))
     #a.draw_cover()
 
     # Create the figure and axes objects
-    fig, axs = plt.subplots(M, N, figsize=(N * 3, M * 3))
+    fig, axs = plt.subplots(M, N, figsize=(N * 4, M * 3))
 
     # Loop over the rows and columns
     for i in range(M): #row
         for j in range(N): #col
             # Determine the current axes
-            if M > 1:
+            if M > 1 and N>1:
                 ax = axs[ i,j]
-            else:
+            elif N>1:
                 ax = axs[j] 
-            a.draw_cover_subset(i,j,ax)
+            elif M>1:
+                ax = axs[i]
+              
+            hypercube.draw_cover_subset(i,j,ax)
 
 
     plt.tight_layout()
@@ -98,5 +100,17 @@ if __name__=='__main__':
     # (only vertices and edges)
 
     # to compute the localized homology, directly use the cover as the input of BlowupComplex()
-    blowup = BlowupComplex(a.cover)
-    dgms = blowup.compute_persistence(show_diag=False)
+    blowup = BlowupComplex(hypercube.cover)
+    blowup.compute_persistence(show_diag=False)
+
+    print('all basis',blowup.cycle_basis)
+
+    # visualize the last three cycles with birth 1
+    cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )[-3:]
+
+    print( "cycles with birth 1:", cycle_edges)
+
+    #blowup.get_barcode_basis(birth=1,death=np.inf)# _by_birthtime()
+    #print(blowup.cycle_basis)
+    
+    delaunay_complex.draw_chains(cycle_edges)

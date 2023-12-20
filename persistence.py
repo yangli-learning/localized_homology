@@ -10,6 +10,15 @@ import phat
 import itertools
 import util
 
+
+def _get_barcode_from_pair(creator,destroyer, ordered_simplices):
+    creator_simplex, birth= ordered_simplices[creator]
+    destroyer_simplex, death = ordered_simplices[destroyer]
+    if destroyer == -1: # for compatibility sometimes inf is represented by -1
+        death = np.inf 
+    dim = len(creator_simplex)-1 # dimension of the cycle
+    return (birth,death) ,dim
+
 def _process_distances(pairs, ordered_simplices,show_diag=False,cover=None):
     """ Setup persistence diagrams by reading off distances
     new options:
@@ -21,15 +30,16 @@ def _process_distances(pairs, ordered_simplices,show_diag=False,cover=None):
     posneg = np.zeros(len(ordered_simplices))
 
     for [bi, di] in pairs:
-        bidxs, bd = ordered_simplices[bi]  # get birth time (timestep of the creator)
-        didxs, dd = ordered_simplices[di]  # get death time (timestep of the corresponding destroyer)
+        (bd,dd),p = _get_barcode_from_pair(bi,di,ordered_simplices)
+        #bidxs, bd = ordered_simplices[bi]  # get birth time (timestep of the creator)
+        #didxs, dd = ordered_simplices[di]  # get death time (timestep of the corresponding destroyer)
         assert posneg[bi] == 0 and posneg[di] == 0
         posneg[bi], posneg[di] = 1, -1     # set creator and destroyer
 
         assert dd >= bd
         # assert len(bidxs) == len(didxs) - 1
 
-        p = len(bidxs) - 1    # get the dimension of this cycle (todo: use dim(sigma)+dim(Deltq) )
+        #p = len(bidxs) - 1    # get the dimension of this cycle (todo: use dim(sigma)+dim(Deltq) )
 
         if cover:
             # Don't add zero persistence pairs
@@ -106,7 +116,7 @@ def plotbarcode_BC(dgms,dim,coverlabel2id):
     axes.set_yticks([])   #axes.invert_yaxis()
     plt.show()
 
-def compute_persistence(ordered_simplices, columns,cover ,show_diag=False,verbose=False):
+def compute_persistence_dgm(ordered_simplices, columns,cover ,show_diag=False,verbose=False):
     if show_diag:
         print('display homology classes on the diagonal')
     
@@ -121,13 +131,6 @@ def compute_persistence(ordered_simplices, columns,cover ,show_diag=False,verbos
     # compute persistence pairs (hide diagonals to make it easier to read)
     dgms =  _process_distances(pairs, ordered_simplices,show_diag,cover)
     dgms ,pairs =  _add_unpaired(dgms, pairs, ordered_simplices,cover)
-    
-    cycle_basis = dict()
-    for p in pairs:
-        if verbose:
-            print(p)
-        if p[1]==-1:
-            cycle_basis[p[0]] =  find_basis(p[0],columns,pairs) 
         
     # assign a color id to each subset combination 
     coverlabel2id = dict([ (c,i) for i,c in enumerate(set(cover)) ])
@@ -135,7 +138,18 @@ def compute_persistence(ordered_simplices, columns,cover ,show_diag=False,verbos
         print('H%d |'%dim,dgm )
         plotbarcode_BC(dgms,dim,coverlabel2id )  
     
-    return dgms, cycle_basis 
+    return dgms, pairs  
+
+def compute_basis_from_persistence_pairs(columns, ordered_simplices,pairs):
+    cycle_basis = dict()
+    for p in pairs: 
+        if p[1]==-1: # only compute basis living at time n-1
+            basis = find_basis(p[0],columns,pairs)
+            barcode,dim = _get_barcode_from_pair(p[0],p[1], ordered_simplices)
+            cycle_basis[p[0]] =  dict({ 'barcode':barcode, 'H_dim':dim,'basis':basis})
+
+
+    return cycle_basis
 
 def project_chain_to_x(ordered_simplices,chain, cover):
     # given a chain (list of integer) indexed in the product complex
