@@ -80,14 +80,19 @@ def _max_non_infinite(numbers):
         return 10 
     return max(finite_numbers)
     
-def plotbarcode_BC(dgms,dim,coverlabel2id):
-    persistence = [ [coverlabel2id[c],(b,d)]  for b,d,c in dgms[dim] ]
-    labels = [ c for b,d,c in dgms[dim]]
-    
+def plotbarcode_BC(dgms,dim,coverlabel2id=None):
+    if coverlabel2id:
+        persistence = [ [coverlabel2id[c],(b,d)]  for b,d,c in dgms[dim] ]
+        labels = [ c for b,d,c in dgms[dim]]
+    else:
+        persistence =   [ [0,(b,d)]  for b,d  in dgms[dim] ]
+        labels =  ''
+
+    print("number of bars",len(persistence))
     _, axes = plt.subplots(1, 1,figsize=(4,1.5))
     colormap = plt.cm.tab20.colors
 
-    death = [d for b,d,c in dgms[dim]]
+    death = [bd[1] for bd in dgms[dim]]
     
     largest_non_infinite = _max_non_infinite( death )
     # if max non infinite is zero, 
@@ -96,10 +101,12 @@ def plotbarcode_BC(dgms,dim,coverlabel2id):
     else:
         infinity  = largest_non_infinite*1.8
     
-    x = [birth for (dim, (birth, death)) in persistence]
-    y = [(death - birth) if death != float("inf") else (infinity - birth) for (dim, (birth, death)) in persistence]
-    c = [colormap[dim % len(colormap) ] for (dim, (birth, death)) in persistence]
-    
+    x = [birth for (cid, (birth, death)) in persistence]
+    y = [(death - birth) if death != float("inf") else (infinity - birth) for (cid, (birth, death)) in persistence]
+    if coverlabel2id:
+        c = [colormap[cid % len(colormap) ] for (cid, (birth, death)) in persistence]
+    else:
+        c = colormap[0]
     axes.barh(range(len(x)), y, left=x, alpha=0.5, color=c, linewidth=0,label=labels)
     axes.axvline(x=infinity , color='red', linestyle='--') 
 
@@ -120,18 +127,21 @@ def compute_persistence_dgm(ordered_simplices, columns,cover ,show_diag=False,ve
     if show_diag:
         print('display homology classes on the diagonal')
     
-
     ## Setup boundary matrix and reduce
     boundary_matrix = phat.boundary_matrix(
         columns=columns , representation=phat.representations.sparse_pivot_column
     )
     pairs = boundary_matrix.compute_persistence_pairs()
     pairs.sort()
-    
+
     # compute persistence pairs (hide diagonals to make it easier to read)
     dgms =  _process_distances(pairs, ordered_simplices,show_diag,cover)
     dgms ,pairs =  _add_unpaired(dgms, pairs, ordered_simplices,cover)
-        
+    
+    if verbose:
+        for b,d in pairs:
+         print(b,d )
+
     # assign a color id to each subset combination 
     coverlabel2id = dict([ (c,i) for i,c in enumerate(set(cover)) ])
     for dim,dgm in dgms.items(): 
@@ -147,15 +157,8 @@ def compute_basis_from_persistence_pairs(columns, ordered_simplices,pairs):
             basis = find_basis(p[0],columns,pairs)
             barcode,dim = _get_barcode_from_pair(p[0],p[1], ordered_simplices)
             cycle_basis[p[0]] =  dict({ 'barcode':barcode, 'H_dim':dim,'basis':basis})
-
-
     return cycle_basis
 
-def project_chain_to_x(ordered_simplices,chain, cover):
-    # given a chain (list of integer) indexed in the product complex
-    # return a representation [( simplex, 'coverlabel')]
-    return list(map(lambda s: (ordered_simplices[s][0],cover[s] ),chain )) 
-    
 
 def find_basis(sid,columns,pairs ):
     # sid is the id of a creator. we repeatedly find the cascade of sid, 

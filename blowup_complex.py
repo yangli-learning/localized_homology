@@ -130,7 +130,7 @@ class BlowupComplex():
         self.dgms,self.pairs  = persis.compute_persistence_dgm(ordered_simplices, 
                                                columns,cover, 
                                                show_diag=show_diag,verbose=verbose) 
-    
+
         if compute_basis: 
             # trace the basis of each homology class
             self.cycle_basis = persis.compute_basis_from_persistence_pairs(columns, 
@@ -151,7 +151,7 @@ class BlowupComplex():
         for creator,basis_dict in self.cycle_basis.items():
             if basis_dict['barcode'][0] == birth:
                 cycles.append(  [ tuple(sp.sigma ) for sp in basis_dict['product_simplex']])
-                print('cover',basis_dict['cover'] )
+                print('cover spanned by cycles:',basis_dict['cover'] )
                 
         return cycles
         

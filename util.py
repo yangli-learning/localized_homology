@@ -58,3 +58,4 @@ def find_superset( sets, query):
         all(Counter(sub)[x] >= Counter(query)[x]
         for x in Counter(query))]
     return res 
+
