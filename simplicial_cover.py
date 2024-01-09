@@ -13,6 +13,7 @@ import numpy as np
 import math
 import itertools
 import matplotlib.pyplot as plt
+import matplotlib.collections as mcoll
 
 
 
@@ -139,3 +140,161 @@ class HyperCube:
         ax.scatter(self.point[points, 0], self.point[points, 1], color='r')
 
         ax.set_title("ID=%d" % (  i*self.M+j))
+
+class HyperCubeTri(HyperCube):
+  def __init__(self,point,edge,N,M,r)-> None:
+      super().__init__(point,edge,N,M,r)
+
+  def compute_cover(self):
+    
+      #self.cover = []
+
+      max_x = max(self.point[:,0])
+      min_x = min(self.point[:,0])
+      max_y = max(self.point[:,1])
+      min_y = min(self.point[:,1])
+      range_x = (max_x - min_x)/self.N
+      range_y = (max_y - min_y)/self.M
+
+      cover_x = []
+      #print(type(self.N))
+      for i in range(self.N):
+        cover_x.append([])
+        self.bounder_list_x.append([min_x + i * range_x - range_x*self.r/2,
+                                    min_x + (i+1)*range_x + range_x*self.r/2])
+        #print(min_x + (i+1)*range_x + range_x*self.r , min_x + i * range_x)
+        for j, point in enumerate(self.point):
+
+          if ((min_x + (i+1)*range_x + range_x*self.r/2) >= point[0] >= (min_x + i*range_x-range_x*self.r/2)):
+            cover_x[i].append([j])
+
+      cover_y = []
+      for i in range(self.M):
+        cover_y.append([])
+        self.bounder_list_y.append([min_y + i * range_y - range_y*self.r/2,
+                                    min_y + (i+1)*range_y + range_y*self.r/2])
+        #print(min_y + (i+1)*range_y + range_y*self.r , min_y + i * range_y)
+        for j, point in enumerate(self.point):
+          if ((min_y + (i+1)*range_y + range_y*self.r/2) >= point[1] >= (min_y + i * range_y - range_y*self.r/2)):
+            cover_y[i].append([j])
+
+      self.cover = [[] for _ in range(self.N * self.M)]
+      i = 0
+
+
+      for x in range(self.N):
+        for y in range(self.M):
+          for point in cover_x[x]:
+            if point in cover_y[y]:
+              self.cover[i].append(point)
+
+          i = i+1
+
+
+      step_cover = self.cover
+      for j in range(len(step_cover)):
+
+        step_edge_matrix = self.edge_matrix
+
+        for k in range(len(step_cover[j])):
+
+          for i in range(len(self.point)):
+
+            #print(i,j)
+            if step_edge_matrix[step_cover[j][k][0],i] == 1 and step_edge_matrix[i,step_cover[j][k][0]] == 1 and [i] in step_cover[j]:
+              if step_cover[j][k][0] < i:
+                if [step_cover[j][k][0],i] in self.cover[j]:
+                  continue
+                else:
+                  self.cover[j].append([step_cover[j][k][0],i])
+              else:
+                if [i, step_cover[j][k][0]] in self.cover[j]:
+                  continue
+                else:
+                  self.cover[j].append([i,step_cover[j][k][0]])
+
+      def find_triangles(adjacency_matrix):
+        num_vertices = len(adjacency_matrix)
+        triangles = []
+        for i in range(num_vertices):
+          for j in range(i + 1, num_vertices):
+            for k in range(j + 1, num_vertices):
+                if adjacency_matrix[i, j] and adjacency_matrix[j, k] and adjacency_matrix[k, i]:
+                    triangle = [i, j, k]
+                    triangles.append(triangle)
+        return triangles
+
+      triangles_list = find_triangles(self.edge_matrix)
+      step_cover = [[] for _ in range(self.N * self.M)]
+      for triangle in triangles_list:
+        j = -1
+        for small_cover in self.cover:
+          j = j+1
+
+          if [triangle[0],triangle[1]] in small_cover and [triangle[0],triangle[2]] in small_cover and [triangle[1],triangle[2]] in small_cover:
+            small_cover.append(triangle)
+            continue
+
+          if [triangle[0],triangle[1]] in small_cover or [triangle[0],triangle[2]] in small_cover or [triangle[1],triangle[2]] in small_cover:# or [triangle[0]] in small_cover  or [triangle[1]] in small_cover or [triangle[2]] in small_cover:
+            if [triangle[0],triangle[1]] not in small_cover and [triangle[0],triangle[1]] not in step_cover[j]:
+              step_cover[j].append([triangle[0],triangle[1]])
+            if [triangle[0],triangle[2]] not in small_cover and [triangle[0],triangle[2]] not in step_cover[j]:
+              step_cover[j].append([triangle[0],triangle[2]])
+            if [triangle[1],triangle[2]] not in small_cover and [triangle[1],triangle[2]] not in step_cover[j]:
+              step_cover[j].append([triangle[1],triangle[2]])
+            if [triangle[0]] not in small_cover and [triangle[0]] not in step_cover[j]:
+              step_cover[j].append([triangle[0]])
+            if [triangle[1]] not in small_cover and [triangle[1]] not in step_cover[j]:
+              step_cover[j].append([triangle[1]])
+            if [triangle[2]] not in small_cover and [triangle[2]] not in step_cover[j]:
+              step_cover[j].append([triangle[2]])
+            step_cover[j].append(triangle)
+
+
+      for j in range(len(step_cover)):
+        for i in range(len(step_cover[j])):
+          self.cover[j].append(step_cover[j][i])
+
+
+  def draw_cover(self):
+      #super().draw_cover(self)
+      
+      for i in range(self.N):
+        for j in range(self.M):
+          x1, y1 = self.bounder_list_x[i][0], self.bounder_list_y[j][0]
+          x2, y2 = self.bounder_list_x[i][1], self.bounder_list_y[j][1]
+          color_ij = [ round(i/self.N, 1),round(j/self.M, 1),round(i*j/(self.N*self.M),1)]
+          plt.plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], 'o-',alpha = 0.5,
+                    color = color_ij)
+      
+          cover_ij = self.cover[i*self.M+j]  
+
+          triangles = [c for c in cover_ij if len(c)==3]
+          triangle_coords = [[self.point[vertex] for vertex in triangle] \
+                             for triangle in triangles]
+
+          poly_collection = mcoll.PolyCollection(triangle_coords, facecolor=color_ij,alpha=0.3)
+          plt.gca().add_collection(poly_collection) 
+
+
+      for edge in self.edge:
+
+          plt.plot(self.point[edge, 0], self.point[edge, 1],color= 'blue')
+          #plt.triplot(self.data[:, 0], self.data[:, 1], self.simplices)
+      plt.scatter(self.point[:, 0], self.point[:, 1], color='r')
+      plt.show()
+
+      return 0
+  
+  def draw_cover_subset(self,j,i,ax):
+      super().draw_cover_subset(j,i,ax)
+      
+      # add triangle faces in the cover 
+      cover_ij = self.cover[i*self.M+j]  
+      triangles = [c for c in cover_ij if len(c)==3]
+      triangle_coords = [[self.point[vertex] for vertex in triangle] for triangle in triangles]
+
+      poly_collection = mcoll.PolyCollection(triangle_coords, facecolor='red',alpha=0.5)
+      ax.add_collection(poly_collection)  
+
+      

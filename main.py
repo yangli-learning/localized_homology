@@ -2,7 +2,7 @@
 
 from blowup_complex import ProductSimplex, BlowupComplex
 from complex import DelaunayComplex
-from simplicial_cover import HyperCube
+from simplicial_cover import HyperCube,HyperCubeTri
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -52,19 +52,20 @@ if __name__=='__main__':
     print('all basis',blowup.cycle_basis)
     
 
-
     """
-    point cloud with hypercube cover
+    point cloud with hypercube cover including face
     """
     circles_data = util.threecircles(N=25,s=42)
     delaunay_complex = DelaunayComplex(np.array(circles_data ),4)#生成2Dmesh
     
     N=3 # columns
     M=3 # rows
-    hypercube = HyperCube(circles_data,delaunay_complex.edge_index(), 
+    hypercube = HyperCubeTri(circles_data,delaunay_complex.edge_index(), 
                 N,  M,  r=0.5)
     print("Create hyperCube cover of size:", len(hypercube.cover))
-    #hypercube.draw_cover()
+    hypercube.draw_cover()
+
+    print(hypercube.cover)
     
     # Create the figure and axes objects
     fig, axs = plt.subplots(M, N, figsize=(N * 4, M * 3))
@@ -95,7 +96,8 @@ if __name__=='__main__':
     blowup.compute_persistence(verbose=False,show_diag=False)
 
     # visualize the last three cycles with birth 1
-    cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )[-3:]
+    cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
+    print("number of cylces tracked",len(cycle_edges))
 
     #print( "cycles with birth 1:", cycle_edges)
     delaunay_complex.draw_chains(cycle_edges)
