@@ -3,6 +3,9 @@ from sklearn import datasets
 from sklearn.datasets import make_circles
 import numpy as np
 from collections import Counter
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import shortest_path
+
 
 #from matplotlib import pyplot as plt
 

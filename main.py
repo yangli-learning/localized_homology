@@ -61,7 +61,7 @@ if __name__=='__main__':
     N=3 # columns
     M=3 # rows
     hypercube = HyperCubeTri(circles_data,delaunay_complex.edge_index(), 
-                N,  M,  r=0.5)
+                N,  M,  r=0.3)
     print("Create hyperCube cover of size:", len(hypercube.cover))
     hypercube.draw_cover()
 
@@ -97,6 +97,7 @@ if __name__=='__main__':
 
     # visualize the last three cycles with birth 1
     cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
+    
     print("number of cylces tracked",len(cycle_edges))
 
     #print( "cycles with birth 1:", cycle_edges)

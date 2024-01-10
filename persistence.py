@@ -150,11 +150,13 @@ def compute_persistence_dgm(ordered_simplices, columns,cover ,show_diag=False,ve
     
     return dgms, pairs  
 
-def compute_basis_from_persistence_pairs(columns, ordered_simplices,pairs):
+def compute_basis_from_persistence_pairs(columns, ordered_simplices,pairs,verbose):
     cycle_basis = dict()
     for p in pairs: 
         if p[1]==-1: # only compute basis living at time n-1
             basis = find_basis(p[0],columns,pairs)
+            if verbose:
+                print("H",dim, "cycle basis",basis)
             barcode,dim = _get_barcode_from_pair(p[0],p[1], ordered_simplices)
             cycle_basis[p[0]] =  dict({ 'barcode':barcode, 'H_dim':dim,'basis':basis})
     return cycle_basis

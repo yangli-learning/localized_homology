@@ -134,7 +134,8 @@ class BlowupComplex():
         if compute_basis: 
             # trace the basis of each homology class
             self.cycle_basis = persis.compute_basis_from_persistence_pairs(columns, 
-                                                                           ordered_simplices, self.pairs) 
+                                                                           ordered_simplices, 
+                                                                           self.pairs,verbose=verbose) 
             flattened_list = [sp for X_U_T in self.X_U for sp in X_U_T]
             # map the basis to barcode, simplices and to cover
             for creator,basis_dict in self.cycle_basis.items():
