@@ -102,12 +102,14 @@ if __name__=='__main__':
     
     # visualize the last three cycles with birth 0 and 1 
 
-    cycle_edges = blowup.get_cycle_edges_by_birth(birth=0 )
-    print( "cycles with birth 0:", cycle_edges) 
+    cycle_edges0 = blowup.get_cycle_edges_by_birth(birth=0 )
+    complex.draw_chains(cycle_edges0)
 
-    cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
-    print( "cycles with birth 1:", cycle_edges) 
-    complex.draw_chains(cycle_edges)
+    print( "cycles with birth 0:", cycle_edges0) 
+
+    cycle_edges1 = blowup.get_cycle_edges_by_birth(birth=1 )
+    print( "cycles with birth 1:", cycle_edges1) 
+    complex.draw_chains(cycle_edges1)
  
 
 
