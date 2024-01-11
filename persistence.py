@@ -155,9 +155,9 @@ def compute_basis_from_persistence_pairs(columns, ordered_simplices,pairs,verbos
     for p in pairs: 
         if p[1]==-1: # only compute basis living at time n-1
             basis = find_basis(p[0],columns,pairs)
+            barcode,dim = _get_barcode_from_pair(p[0],p[1], ordered_simplices)
             if verbose:
                 print("H",dim, "cycle basis",basis)
-            barcode,dim = _get_barcode_from_pair(p[0],p[1], ordered_simplices)
             cycle_basis[p[0]] =  dict({ 'barcode':barcode, 'H_dim':dim,'basis':basis})
     return cycle_basis
 
@@ -166,7 +166,7 @@ def find_basis(sid,columns,pairs ):
     # sid is the id of a creator. we repeatedly find the cascade of sid, 
     # which forms the basis of the homology class
     cascade = set([sid])
-    basis = set([sid])
+    basis = set()#[sid])
     partner = [0]* len(columns) 
     for birth,death in pairs:
         partner[birth] = death

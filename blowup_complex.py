@@ -147,7 +147,7 @@ class BlowupComplex():
         print('number of persistence pairs',len(self.pairs)) # all pairs (but not ordered)
         print('number of H classes at infty', len(self.cycle_basis)) # only pairs existing at infty
 
-    def get_cycle_edges_by_birth(self,birth):
+    def get_cycle_edges_by_birth(self,birth=0):
         cycles =  []
         for creator,basis_dict in self.cycle_basis.items():
             if basis_dict['barcode'][0] == birth:

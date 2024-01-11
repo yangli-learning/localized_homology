@@ -5,12 +5,14 @@ from complex import DelaunayComplex
 from simplicial_cover import HyperCube,HyperCubeTri
 import numpy as np
 from matplotlib import pyplot as plt
+from datasets import *
 
 import util
 
+
 if __name__=='__main__':
     """
-    linear chain with two covers 
+    Example 1: linear chain with two covers 
 
     ```
     X:    0-1-2-3
@@ -23,6 +25,7 @@ if __name__=='__main__':
     ```
     """
     
+    
     X0 = [[0],[1],[2],[0,1],[1,2]]
     X1 = [[1],[2],[3],[1,2],[2,3]]   
 
@@ -32,7 +35,7 @@ if __name__=='__main__':
     
    
     """ 
-    a cycle with three covers 
+    Example 2: a cycle with three covers 
     ```
      X:    0--1--2
            |     |
@@ -53,7 +56,7 @@ if __name__=='__main__':
     
 
     """
-    point cloud with hypercube cover including face
+    Example 3: point cloud with hypercube cover including faces
     """
     circles_data = util.threecircles(N=25,s=42)
     delaunay_complex = DelaunayComplex(np.array(circles_data ),4)#生成2Dmesh
@@ -63,42 +66,48 @@ if __name__=='__main__':
     hypercube = HyperCubeTri(circles_data,delaunay_complex.edge_index(), 
                 N,  M,  r=0.3)
     print("Create hyperCube cover of size:", len(hypercube.cover))
-    hypercube.draw_cover()
+    hypercube.visualize_cover_subsets()
 
-    print(hypercube.cover)
-    
-    # Create the figure and axes objects
-    fig, axs = plt.subplots(M, N, figsize=(N * 4, M * 3))
-
-    # Loop over the rows and columns
-    for i in range(M): #row
-        for j in range(N): #col
-            # Determine the current axes
-            if M > 1 and N>1:
-                ax = axs[ i,j]
-            elif N>1:
-                ax = axs[j] 
-            elif M>1:
-                ax = axs[i]
-              
-            hypercube.draw_cover_subset(i,j,ax)
-
-
-    plt.tight_layout()
-    plt.show()
-    
-    """
-    compute localized homology and visualize basis
-    """
-
-    # to compute the localized homology, directly use the cover as the input of BlowupComplex()
+    # compute the localized homology 
     blowup = BlowupComplex(hypercube.cover)
     blowup.compute_persistence(verbose=False,show_diag=False)
 
     # visualize the last three cycles with birth 1
     cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
     
-    print("number of cylces tracked",len(cycle_edges))
-
     #print( "cycles with birth 1:", cycle_edges)
     delaunay_complex.draw_chains(cycle_edges)
+    
+
+    """
+    Example 4: point cloud from image using hypercube cover
+    """
+    dataset = MNIST(root='data/MNIST', download=True, train=False)
+    dataset_2d = MNIST2D(dataset,   200)
+    test_point_cloud =  dataset_2d[101][0].numpy()
+    complex = DelaunayComplex(np.array(test_point_cloud),2) 
+    
+    hypercube = HyperCubeTri(test_point_cloud, complex.edge_index(), 
+              N=3, #N
+              M=3, #M, the numbers of covers is N*M  
+              r=0.3
+              )
+    hypercube.draw_cover()
+
+    #hypercube.visualize_cover_subsets() 
+
+
+    blowup = BlowupComplex(hypercube.cover)
+    blowup.compute_persistence(verbose=True, show_diag=False )
+    
+    # visualize the last three cycles with birth 0 and 1 
+
+    cycle_edges = blowup.get_cycle_edges_by_birth(birth=0 )
+    print( "cycles with birth 0:", cycle_edges) 
+
+    cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
+    print( "cycles with birth 1:", cycle_edges) 
+    complex.draw_chains(cycle_edges)
+ 
+
+

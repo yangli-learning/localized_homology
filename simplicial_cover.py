@@ -14,6 +14,7 @@ import math
 import itertools
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
+from pdb import set_trace as bp
 
 
 
@@ -121,8 +122,25 @@ class HyperCube:
         return 0
 
 
+    def visualize_cover_subsets(self ):
+        # show each cover subset in individual subplots
+        M = self.M
+        N = self.N
+        fig, axs = plt.subplots(M, N, figsize=(N * 4, M * 3))
 
-    def draw_cover_subset(self,j,i,ax):
+        for i in range(M): #row
+            for j in range(N): #col
+                if M > 1 and N>1:
+                    ax = axs[ i,j]
+                elif N>1:
+                    ax = axs[j] 
+                elif M>1:
+                    ax = axs[i]
+                self.draw_cover_subset_by_id(i,j,ax)
+        plt.tight_layout()
+        plt.show()
+
+    def draw_cover_subset_by_id(self,j,i,ax):
         x1, y1 = self.bounder_list_x[i][0], self.bounder_list_y[j][0]
         x2, y2 = self.bounder_list_x[i][1], self.bounder_list_y[j][1]
         ax.plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1],
@@ -266,16 +284,16 @@ class HyperCubeTri(HyperCube):
           color_ij = [ round(i/self.N, 1),round(j/self.M, 1),round(i*j/(self.N*self.M),1)]
           plt.plot([x1, x2, x2, x1, x1], [y1, y1, y2, y2, y1], 'o-',alpha = 0.5,
                     color = color_ij)
-      
+          
           cover_ij = self.cover[i*self.M+j]  
-
+          
           triangles = [c for c in cover_ij if len(c)==3]
           triangle_coords = [[self.point[vertex] for vertex in triangle] \
                              for triangle in triangles]
 
           poly_collection = mcoll.PolyCollection(triangle_coords, facecolor=color_ij,alpha=0.3)
           plt.gca().add_collection(poly_collection) 
-
+          
 
       for edge in self.edge:
 

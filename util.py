@@ -60,3 +60,7 @@ def find_superset( sets, query):
         for x in Counter(query))]
     return res 
 
+def transform_img2pc(img):
+    img_array = np.asarray(img)
+    indices = np.argwhere(img_array > 120)
+    return indices.astype(np.float32)
