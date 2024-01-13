@@ -61,18 +61,18 @@ if __name__=='__main__':
     circles_data = util.threecircles(N=25,s=42)
     delaunay_complex = DelaunayComplex(np.array(circles_data ),4)#生成2Dmesh
     
-    N=3 # columns
-    M=3 # rows
+    N=2 # columns
+    M=2 # rows
     hypercube = HyperCubeTri(circles_data,delaunay_complex.edge_index(), 
                 N,  M,  r=0.3)
     print("Create hyperCube cover of size:", len(hypercube.cover))
+    hypercube.draw_cover()
     hypercube.visualize_cover_subsets()
-
     # compute the localized homology 
     blowup = BlowupComplex(hypercube.cover)
     blowup.compute_persistence(verbose=False,show_diag=False)
 
-    # visualize the last three cycles with birth 1
+    #visualize the last three cycles with birth 1
     cycle_edges = blowup.get_cycle_edges_by_birth(birth=1 )
     
     #print( "cycles with birth 1:", cycle_edges)
@@ -84,7 +84,7 @@ if __name__=='__main__':
     """
     dataset = MNIST(root='data/MNIST', download=True, train=False)
     dataset_2d = MNIST2D(dataset,   200)
-    test_point_cloud =  dataset_2d[101][0].numpy()
+    test_point_cloud =  dataset_2d[100][0].numpy()
     complex = DelaunayComplex(np.array(test_point_cloud),2) 
     
     hypercube = HyperCubeTri(test_point_cloud, complex.edge_index(), 

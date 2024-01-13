@@ -13,11 +13,11 @@ import torch.nn.functional as F
 from sklearn.metrics import mean_squared_error
 from torch.utils.data import random_split
 
-def transform_img2pc(img):
+def transform_img2pc(img,thresh=120):
     # transform image to point cloud
     # TODO: replace constant threshold to probablistsic value
     img_array = np.asarray(img)
-    indices = np.argwhere(img_array > 120)
+    indices = np.argwhere(img_array > thresh )
     return indices.astype(np.float32)
 
 class MNIST2D(Dataset):

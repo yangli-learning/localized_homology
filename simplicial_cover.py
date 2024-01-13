@@ -162,6 +162,8 @@ class HyperCube:
 class HyperCubeTri(HyperCube):
   def __init__(self,point,edge,N,M,r)-> None:
       super().__init__(point,edge,N,M,r)
+      self.cover =[sorted(cover, key=lambda x: (len(x ) , *x )) for cover in self.cover]
+
 
   def compute_cover(self):
     
